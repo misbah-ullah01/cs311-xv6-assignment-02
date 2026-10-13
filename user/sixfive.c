@@ -2,8 +2,6 @@
 #include "kernel/fcntl.h"
 #include "user/user.h"
 
-#define BUF_SIZE 512
-
 static int
 is_separator(char c)
 {
@@ -25,7 +23,7 @@ process_fd(int fd)
   long number = 0;
   int has_number = 0;
 
-  while (read(fd, &c, BUF_SIZE) == 1) {
+  while (read(fd, &c, 1) == 1) {
 
     if (c >= '0' && c <= '9') {
       number = number * 10 + (c - '0');

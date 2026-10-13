@@ -1,3 +1,6 @@
+# Select the lab grading script with LAB=util or LAB=syscall in conf/lab.mk.
+-include conf/lab.mk
+
 K=kernel
 U=user
 
@@ -206,6 +209,16 @@ qemu-gdb: $K/kernel .gdbinit fs.img
 
 print-gdbport:
 	@echo $(GDBPORT)
+
+ifneq ($(V),@)
+GRADEFLAGS += -v
+endif
+
+grade:
+	@echo $(MAKE) clean
+	@$(MAKE) clean || \
+          (echo "'make clean' failed.  HINT: Do you have another running instance of xv6?" && exit 1)
+	./grade-lab-$(LAB) $(GRADEFLAGS)
 
 QEMU_VERSION := $(shell $(QEMU) --version | head -n 1 | sed -E 's/^QEMU emulator version ([0-9]+\.[0-9]+)\..*/\1/')
 check-qemu-version:
