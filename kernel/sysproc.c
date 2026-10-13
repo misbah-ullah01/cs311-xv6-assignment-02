@@ -6,6 +6,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "vm.h"
+#include "sysinfo.h"
 
 uint64
 sys_exit(void)
@@ -96,6 +97,46 @@ sys_kill(void)
 
   argint(0, &pid);
   return kkill(pid);
+}
+
+uint64
+sys_trace(void)
+{
+  int mask;
+
+  argint(0, &mask);
+  myproc()->tracemask = mask;
+  return 0;
+}
+
+uint64
+sys_sysinfo(void)
+{
+  uint64 addr;
+  struct sysinfo info;
+
+  argaddr(0, &addr);
+  info.freemem = kfreemem();
+  info.nproc = proc_count();
+  if (copyout(myproc()->pagetable, myproc()->sz, addr,
+              (char *)&info, sizeof(info)) < 0)
+    return -1;
+  return 0;
+}
+
+uint64
+sys_interpose(void)
+{
+  int mask;
+  char path[MAXPATH];
+  struct proc *p = myproc();
+
+  argint(0, &mask);
+  if (argstr(1, path, sizeof(path)) < 0)
+    return -1;
+  p->interpose_mask = mask;
+  safestrcpy(p->interpose_path, path, sizeof(p->interpose_path));
+  return 0;
 }
 
 // return how many clock tick interrupts have occurred

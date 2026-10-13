@@ -10,12 +10,6 @@ main(int argc, char *argv[])
   }
 
   int ticks = atoi(argv[1]);
-
-  if (pause(ticks) < 0) {
-    fprintf(2, "sleep: pause failed\n");
-    exit(1);
-  }
-
   pause(ticks);
 
   exit(0);

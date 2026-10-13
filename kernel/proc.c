@@ -102,6 +102,21 @@ allocpid()
   return pid;
 }
 
+int
+proc_count(void)
+{
+  int n = 0;
+  struct proc *p;
+
+  for (p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
+    if (p->state != UNUSED)
+      n++;
+    release(&p->lock);
+  }
+  return n;
+}
+
 // Look in the process table for an UNUSED proc.
 // If found, initialize state required to run in the kernel,
 // and return with p->lock held.
@@ -166,6 +181,8 @@ freeproc(struct proc *p)
   p->name[0] = 0;
   p->chan = 0;
   p->killed = 0;
+  p->interpose_mask = 0;
+  p->interpose_path[0] = 0;
   p->xstate = 0;
   p->state = UNUSED;
 }
@@ -288,6 +305,10 @@ kfork(void)
   np->cwd = idup(p->cwd);
 
   safestrcpy(np->name, p->name, sizeof(p->name));
+  np->tracemask = p->tracemask;
+  np->interpose_mask = p->interpose_mask;
+  safestrcpy(np->interpose_path, p->interpose_path,
+             sizeof(np->interpose_path));
 
   pid = np->pid;
 

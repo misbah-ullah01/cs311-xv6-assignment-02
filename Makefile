@@ -78,6 +78,9 @@ CFLAGS += -fno-builtin-free
 CFLAGS += -fno-builtin-memcpy -Wno-main
 CFLAGS += -fno-builtin-printf -fno-builtin-fprintf -fno-builtin-vprintf
 CFLAGS += -I.
+ifeq ($(LAB),syscall)
+CFLAGS += -DLAB_SYSCALL
+endif
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 
 # Disable PIE when possible (for Ubuntu 16.10 toolchain)
@@ -151,9 +154,20 @@ UPROGS=\
 	$U/_dorphan\
 	$U/_sync\
 	$U/_sleep\
+	$U/_sixfive\
+	$U/_memdump\
+	$U/_find\
+	$U/_trace\
+	$U/_sysinfo\
+	$U/_sandbox\
+	$U/_sbtest\
+	$U/_attack\
+	$U/_secret\
 
-fs.img: mkfs/mkfs README $(UPROGS)
-	mkfs/mkfs fs.img README $(UPROGS)
+UEXTRA = user/exec.sh user/findtest.sh user/sixfive.txt
+
+fs.img: mkfs/mkfs README $(UEXTRA) $(UPROGS)
+	mkfs/mkfs fs.img README $(UEXTRA) $(UPROGS)
 
 -include kernel/*.d user/*.d
 
