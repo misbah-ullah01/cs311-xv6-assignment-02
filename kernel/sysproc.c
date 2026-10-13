@@ -131,6 +131,8 @@ sys_interpose(void)
   char path[MAXPATH];
   struct proc *p = myproc();
 
+  if (p->interpose_mask != 0)
+    return -1;
   argint(0, &mask);
   if (argstr(1, path, sizeof(path)) < 0)
     return -1;
